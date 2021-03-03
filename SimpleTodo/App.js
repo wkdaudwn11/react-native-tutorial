@@ -25,9 +25,20 @@ const TodoItem = styled.View`
   align-items: center;
   padding: 8px 0;
 `;
+
+const TodoCheckContainer = styled.TouchableOpacity`
+  margin-right: 8px;
+`;
+
+const TodoCheckIcon = styled.Text`
+  /* flex-basis: 30px; */
+`;
+
 const TodoItemText = styled.Text`
-  font-size: 20px;
+  font-size: 18px;
   flex: 1;
+  text-decoration: ${({ done }) => done && "line-through"};
+  color: ${({ done }) => (done ? "#a5a5a5" : "black")};
 `;
 const TodoItemButton = styled.Button``;
 
@@ -52,7 +63,8 @@ export default function App() {
 
     const newItem = {
       id: new Date().getTime().toString(),
-      todo
+      todo,
+      done: false
     };
     store([...list, newItem]);
     setInput("");
@@ -73,6 +85,16 @@ export default function App() {
       .catch(err => alert(err.message));
   }
 
+  function handleCheckPress(id) {
+    const newList = list.map(item => {
+      return {
+        ...item,
+        done: item.id === id ? !item.done : item.done
+      };
+    });
+    store(newList);
+  }
+
   React.useEffect(() => {
     AsyncStorage.getItem("list")
       .then(data => {
@@ -88,10 +110,15 @@ export default function App() {
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}>
         <Contents>
           {list.map(item => {
-            const { id, todo } = item;
+            const { id, todo, done } = item;
             return (
               <TodoItem key={id}>
-                <TodoItemText>{todo}</TodoItemText>
+                <TodoCheckContainer onPress={() => handleCheckPress(id)}>
+                  <TodoCheckIcon>{done ? "✅" : "☑️"}</TodoCheckIcon>
+                </TodoCheckContainer>
+                <TodoItemText done={done} onPress={() => handleCheckPress(id)}>
+                  {todo}
+                </TodoItemText>
                 <TodoItemButton title="삭제" onPress={() => handleDeletePress(id)} />
               </TodoItem>
             );
