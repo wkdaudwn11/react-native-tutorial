@@ -3,6 +3,7 @@ import styled from "styled-components/native";
 import { Platform } from "react-native";
 import Constants from "expo-constants";
 import _ from "lodash";
+import AsyncStorage from "@react-native-community/async-storage";
 
 const Container = styled.SafeAreaView`
   flex: 1;
@@ -44,20 +45,7 @@ const Button = styled.Button``;
 
 export default function App() {
   const [input, setInput] = React.useState("");
-  const [list, setList] = React.useState([
-    {
-      id: 1,
-      todo: "할 일 1"
-    },
-    {
-      id: 2,
-      todo: "할 일 2"
-    },
-    {
-      id: 3,
-      todo: "할 일 3"
-    }
-  ]);
+  const [list, setList] = React.useState([]);
 
   function handleAddPress(todo) {
     if (!todo) return;
@@ -66,7 +54,7 @@ export default function App() {
       id: new Date().getTime().toString(),
       todo
     };
-    setList([...list, newItem]);
+    store([...list, newItem]);
     setInput("");
   }
 
@@ -74,8 +62,26 @@ export default function App() {
     // const newList = list.filter(item => item.id !== id);
     // setList(newList);
     const newList = _.reject(list, item => item.id === id);
-    setList(newList);
+    store(newList);
   }
+
+  function store(newList) {
+    if (!newList || !Array.isArray(newList)) return;
+    setList(newList);
+    AsyncStorage.setItem("list", JSON.stringify(newList))
+      .then(() => {})
+      .catch(err => alert(err.message));
+  }
+
+  React.useEffect(() => {
+    AsyncStorage.getItem("list")
+      .then(data => {
+        if (data) setList(JSON.parse(data));
+      })
+      .catch(err => {
+        alert(err.message);
+      });
+  }, []);
 
   return (
     <Container>
