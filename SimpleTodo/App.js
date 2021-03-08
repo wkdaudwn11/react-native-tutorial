@@ -67,30 +67,28 @@ export default function App() {
       todo,
       done: false
     };
-    store([...list, newItem]);
+    setStore([...list, newItem]);
     setInput("");
   }
 
   function handleDeletePress(id) {
-    // const newList = list.filter(item => item.id !== id);
-    // setList(newList);
     const newList = _.reject(list, item => item.id === id);
-    store(newList);
-  }
-
-  function store(newList) {
-    if (!newList || !Array.isArray(newList)) return;
-    setList(newList);
-    AsyncStorage.setItem("list", JSON.stringify(newList))
-      .then(() => {})
-      .catch(err => alert(err.message));
+    setStore(newList);
   }
 
   function handleCheckPress(index) {
     const newList = produce(list, draft => {
       draft[index].done = !list[index].done;
     });
-    store(newList);
+    setStore(newList);
+  }
+
+  function setStore(newList) {
+    if (!newList || !Array.isArray(newList)) return;
+    setList(newList);
+    AsyncStorage.setItem("list", JSON.stringify(newList))
+      .then(() => {})
+      .catch(err => alert(err.message));
   }
 
   React.useEffect(() => {
