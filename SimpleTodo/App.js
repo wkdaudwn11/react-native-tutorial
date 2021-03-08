@@ -4,6 +4,7 @@ import { Platform } from "react-native";
 import Constants from "expo-constants";
 import _ from "lodash";
 import AsyncStorage from "@react-native-community/async-storage";
+import produce from "immer";
 
 const Container = styled.SafeAreaView`
   flex: 1;
@@ -31,11 +32,11 @@ const TodoCheckContainer = styled.TouchableOpacity`
 `;
 
 const TodoCheckIcon = styled.Text`
-  /* flex-basis: 30px; */
+  font-size: 20px;
 `;
 
 const TodoItemText = styled.Text`
-  font-size: 18px;
+  font-size: 20px;
   flex: 1;
   text-decoration: ${({ done }) => done && "line-through"};
   color: ${({ done }) => (done ? "#a5a5a5" : "black")};
@@ -85,12 +86,9 @@ export default function App() {
       .catch(err => alert(err.message));
   }
 
-  function handleCheckPress(id) {
-    const newList = list.map(item => {
-      return {
-        ...item,
-        done: item.id === id ? !item.done : item.done
-      };
+  function handleCheckPress(index) {
+    const newList = produce(list, draft => {
+      draft[index].done = !list[index].done;
     });
     store(newList);
   }
@@ -109,14 +107,14 @@ export default function App() {
     <Container>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}>
         <Contents>
-          {list.map(item => {
+          {list.map((item, index) => {
             const { id, todo, done } = item;
             return (
               <TodoItem key={id}>
-                <TodoCheckContainer onPress={() => handleCheckPress(id)}>
+                <TodoCheckContainer onPress={() => handleCheckPress(index)}>
                   <TodoCheckIcon>{done ? "✅" : "☑️"}</TodoCheckIcon>
                 </TodoCheckContainer>
-                <TodoItemText done={done} onPress={() => handleCheckPress(id)}>
+                <TodoItemText done={done} onPress={() => handleCheckPress(index)}>
                   {todo}
                 </TodoItemText>
                 <TodoItemButton title="삭제" onPress={() => handleDeletePress(id)} />
