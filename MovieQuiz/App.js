@@ -1,114 +1,90 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
- */
-
 import React from 'react';
-import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
-  View,
-  Text,
-  StatusBar,
-} from 'react-native';
+import styled from 'styled-components';
+import movieList from './movieList';
+import _ from 'lodash';
 
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+const Container = styled.SafeAreaView`
+  flex: 1;
+`;
 
-const App: () => React$Node = () => {
+const Quiz = styled.Text`
+  font-size: 48px;
+  font-weight: bold;
+  text-align: center;
+  padding: 24px;
+`;
+
+const Contents = styled.View`
+  flex: 1;
+  justify-content: center;
+`;
+
+const Button = styled.TouchableOpacity`
+  width: 100%;
+  height: 50px;
+  background-color: #cc0000;
+  justify-content: center;
+  align-items: center;
+`;
+
+const Label = styled.Text`
+  font-size: 22px;
+  font-weight: bold;
+  color: #ffffff;
+`;
+
+const App = () => {
+  const [quizList, setQuizList] = React.useState(_.shuffle(movieList));
+  const [mode, setMode] = React.useState('quiz'); // quiz || answer
+
+  function getInitials(string) {
+    return string
+      .split('')
+      .map((char) => {
+        const index = (char.charCodeAt(0) - 44032) / 28 / 21;
+        if (index >= 0) {
+          return String.fromCharCode(index + 4352);
+        }
+        return char;
+      })
+      .join('');
+  }
+
+  const handlePress = React.useCallback(() => {
+    if (mode === 'answer') {
+      setQuizList(quizList.slice(1));
+    }
+    const newMode = mode === 'quiz' ? 'answer' : 'quiz';
+    setMode(newMode);
+  }, [mode, quizList]);
+
+  const retry = React.useCallback(() => {
+    setQuizList(_.shuffle(movieList));
+    setMode('quiz');
+  }, []);
+
   return (
-    <>
-      <StatusBar barStyle="dark-content" />
-      <SafeAreaView>
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          style={styles.scrollView}>
-          <Header />
-          {global.HermesInternal == null ? null : (
-            <View style={styles.engine}>
-              <Text style={styles.footer}>Engine: Hermes</Text>
-            </View>
-          )}
-          <View style={styles.body}>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Step One</Text>
-              <Text style={styles.sectionDescription}>
-                Edit <Text style={styles.highlight}>App.js</Text> to change this
-                screen and then come back to see your edits.
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>See Your Changes</Text>
-              <Text style={styles.sectionDescription}>
-                <ReloadInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Debug</Text>
-              <Text style={styles.sectionDescription}>
-                <DebugInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Learn More</Text>
-              <Text style={styles.sectionDescription}>
-                Read the docs to discover what to do next:
-              </Text>
-            </View>
-            <LearnMoreLinks />
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    </>
+    <Container>
+      <Contents>
+        {quizList.length > 0 ? (
+          <Quiz>
+            {mode === 'quiz' ? getInitials(quizList[0]) : quizList[0]}
+          </Quiz>
+        ) : (
+          <Quiz>끝!</Quiz>
+        )}
+      </Contents>
+      {quizList.length > 0 ? (
+        <Button onPress={handlePress}>
+          <Label>{mode === 'quiz' ? '정답 확인' : '다음'}</Label>
+        </Button>
+      ) : (
+        <Button onPress={retry}>
+          <Label>처음부터 다시 시작</Label>
+        </Button>
+      )}
+    </Container>
   );
 };
-
-const styles = StyleSheet.create({
-  scrollView: {
-    backgroundColor: Colors.lighter,
-  },
-  engine: {
-    position: 'absolute',
-    right: 0,
-  },
-  body: {
-    backgroundColor: Colors.white,
-  },
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: Colors.black,
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-    color: Colors.dark,
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-  footer: {
-    color: Colors.dark,
-    fontSize: 12,
-    fontWeight: '600',
-    padding: 4,
-    paddingRight: 12,
-    textAlign: 'right',
-  },
-});
 
 export default App;
