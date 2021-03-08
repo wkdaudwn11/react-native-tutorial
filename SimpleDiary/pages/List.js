@@ -1,14 +1,56 @@
 import { NavigationContainer } from "@react-navigation/native";
 import React from "react";
-import { Button, View, Text } from "react-native";
+import styled from "styled-components";
+import AsyncStorage from "@react-native-community/async-storage";
+import Container from "../components/Container";
+import Contents from "../components/Contents";
+import Button from "../components/Button";
+
+const ListItem = styled.TouchableOpacity`
+  width: 100%;
+  padding: 12px 0;
+  border-bottom-color: #aaaaaa;
+  border-bottom-width: 1px;
+`;
+const Label = styled.Text`
+  font-size: 20px;
+`;
 
 function List({ navigation }) {
+  const [list, setList] = React.useState([]);
+
+  async function load() {
+    const data = await AsyncStorage.getItem("list");
+    if (data) setList(JSON.parse(data));
+  }
+
+  React.useEffect(() => {
+    const unsubscribe = navigation.addListener("focus", () => {
+      load();
+    });
+
+    load();
+
+    return unsubscribe;
+  }, [navigation]);
+
   return (
-    <View>
-      <Text>List</Text>
-      <Button title="상세" onPress={() => navigation.navigate("Detail")} />
-      <Button title="작성" onPress={() => navigation.navigate("Form")} />
-    </View>
+    <Container>
+      <Contents>
+        {list.map((item, index) => {
+          const { date } = item;
+          return (
+            <ListItem
+              key={`list-${index}`}
+              onPress={() => navigation.navigate("Detail")}
+            >
+              <Label>{date}</Label>
+            </ListItem>
+          );
+        })}
+      </Contents>
+      <Button onPress={() => navigation.navigate("Form")}>새 일기 작성</Button>
+    </Container>
   );
 }
 
