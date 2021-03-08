@@ -2,6 +2,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import React from "react";
 import styled from "styled-components";
 import AsyncStorage from "@react-native-community/async-storage";
+import _ from "lodash";
 import Container from "../components/Container";
 import Contents from "../components/Contents";
 import Button from "../components/Button";
@@ -21,7 +22,9 @@ function List({ navigation }) {
 
   async function load() {
     const data = await AsyncStorage.getItem("list");
-    if (data) setList(JSON.parse(data));
+    if (data) {
+      setList(JSON.parse(data));
+    }
   }
 
   React.useEffect(() => {
@@ -37,14 +40,15 @@ function List({ navigation }) {
   return (
     <Container>
       <Contents>
-        {list.map((item, index) => {
-          const { date } = item;
+        {_.sortBy(list, "date").map((item, index) => {
+          const { date, title } = item;
           return (
             <ListItem
               key={`list-${index}`}
-              onPress={() => navigation.navigate("Detail")}
+              onPress={() => navigation.navigate("Detail", { date })}
             >
               <Label>{date}</Label>
+              <Label>{title}</Label>
             </ListItem>
           );
         })}
