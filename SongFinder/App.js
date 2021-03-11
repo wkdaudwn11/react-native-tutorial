@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import fetch from './fetch';
 
 const Container = styled.SafeAreaView`
   flex: 1;
@@ -34,23 +35,40 @@ const Label = styled.Text`
 `;
 
 function App() {
+  const [keyword, setKeyword] = React.useState('');
+  const [list, setList] = React.useState([]);
+
+  const search = React.useCallback(() => {
+    if (!keyword) {
+      alert('키워드를 입력해주세요');
+      return;
+    }
+
+    fetch(`https://api.manana.kr/karaoke/singer/${keyword}.json`)
+      .then((data) => setList(data))
+      .catch((err) => alert(err.message));
+  }, [keyword]);
+
   return (
     <Container>
       <Row>
-        <Input />
-        <Button title="검색" />
+        <Input value={keyword} onChangeText={(value) => setKeyword(value)} />
+        <Button title="검색" onPress={search} />
       </Row>
-      <Contents>
-        <ListItem>
-          <Label>검색 결과</Label>
-        </ListItem>
-        <ListItem>
-          <Label>검색 결과</Label>
-        </ListItem>
-        <ListItem>
-          <Label>검색 결과</Label>
-        </ListItem>
-      </Contents>
+      {list && (
+        <Contents>
+          {list.map((item) => {
+            const {brand, no, title} = item;
+            return (
+              <ListItem key={brand + no}>
+                <Label>
+                  {brand} / [{no}] {title}
+                </Label>
+              </ListItem>
+            );
+          })}
+        </Contents>
+      )}
     </Container>
   );
 }
