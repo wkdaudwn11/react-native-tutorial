@@ -1,9 +1,9 @@
 import React from 'react';
 import {ActivityIndicator} from 'react-native';
 import styled from 'styled-components';
-import axios from 'axios';
 import moment from 'moment';
 import Title from '../components/Title';
+import fetch from '../net/fetch';
 
 const Container = styled.SafeAreaView`
   flex: 1;
@@ -55,12 +55,11 @@ function MovieDetail({navigation, route}) {
 
   React.useEffect(() => {
     const movieCd = route.params.movieCd;
-    axios
-      .get(
-        `https://www.kobis.or.kr/kobisopenapi/webservice/rest/movie/searchMovieInfo.json?key=853bc8f805d6f1e93fdfc95a6c803f24&movieCd=${movieCd}`,
-      )
-      .then((response) => {
-        setInfo(response.data.movieInfoResult.movieInfo);
+    fetch(
+      `https://www.kobis.or.kr/kobisopenapi/webservice/rest/movie/searchMovieInfo.json?key=853bc8f805d6f1e93fdfc95a6c803f24&movieCd=${movieCd}`,
+    )
+      .then((data) => {
+        setInfo(data.movieInfoResult.movieInfo);
         setPending(false);
       })
       .catch((error) => {

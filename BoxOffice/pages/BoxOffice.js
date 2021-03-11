@@ -1,10 +1,10 @@
 import React from 'react';
 import {ActivityIndicator} from 'react-native';
 import styled from 'styled-components';
-import axios from 'axios';
 import Title from '../components/Title';
 import ListItem from '../components/ListItem';
 import MovieName from '../components/MovieName';
+import fetch from '../net/fetch';
 
 const Container = styled.SafeAreaView`
   flex: 1;
@@ -28,12 +28,11 @@ function BoxOffice({navigation}) {
   const [list, setList] = React.useState([]);
 
   React.useEffect(() => {
-    axios
-      .get(
-        'https://kobis.or.kr/kobisopenapi/webservice/rest/boxoffice/searchDailyBoxOfficeList.json?key=853bc8f805d6f1e93fdfc95a6c803f24&targetDt=20210307',
-      )
-      .then((response) => {
-        const {dailyBoxOfficeList} = response.data.boxOfficeResult;
+    fetch(
+      'https://kobis.or.kr/kobisopenapi/webservice/rest/boxoffice/searchDailyBoxOfficeList.json?key=853bc8f805d6f1e93fdfc95a6c803f24&targetDt=20210307',
+    )
+      .then((data) => {
+        const {dailyBoxOfficeList} = data.boxOfficeResult;
         setList(dailyBoxOfficeList);
         setPending(false);
       })
