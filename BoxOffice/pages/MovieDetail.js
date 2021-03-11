@@ -3,6 +3,7 @@ import {ActivityIndicator} from 'react-native';
 import styled from 'styled-components';
 import axios from 'axios';
 import moment from 'moment';
+import Title from '../components/Title';
 
 const Container = styled.SafeAreaView`
   flex: 1;
@@ -43,12 +44,6 @@ const Contents = styled.ScrollView`
   flex: 1;
 `;
 
-const Title = styled.Text`
-  font-size: 24px;
-  font-weight: bold;
-  margin: 12px;
-`;
-
 const Description = styled.Text`
   font-size: 16px;
   margin: 4px 12px;
@@ -62,7 +57,7 @@ function MovieDetail({navigation, route}) {
     const movieCd = route.params.movieCd;
     axios
       .get(
-        `http://www.kobis.or.kr/kobisopenapi/webservice/rest/movie/searchMovieInfo.json?key=853bc8f805d6f1e93fdfc95a6c803f24&movieCd=${movieCd}`,
+        `https://www.kobis.or.kr/kobisopenapi/webservice/rest/movie/searchMovieInfo.json?key=853bc8f805d6f1e93fdfc95a6c803f24&movieCd=${movieCd}`,
       )
       .then((response) => {
         setInfo(response.data.movieInfoResult.movieInfo);
