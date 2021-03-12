@@ -9,106 +9,94 @@
 import React from 'react';
 import {
   SafeAreaView,
-  StyleSheet,
-  ScrollView,
-  View,
-  Text,
+  ActivityIndicator,
+  Image,
+  Button,
   StatusBar,
 } from 'react-native';
+import ImagePicker from 'react-native-image-picker';
+import axios from 'axios';
 
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+const options = {
+  title: '이미지를 선택해주세요',
+  customButtons: [{name: 'fb', title: '페이스북 사진첩에서 선택하기'}],
+  storageOptions: {
+    skipBackup: true,
+    path: 'images',
+  },
+};
 
-const App: () => React$Node = () => {
+const config = {
+  headers: {
+    Authorization: 'Client-ID 21e459cc3b8bb2c',
+  },
+};
+
+function App() {
+  const [url, setUrl] = React.useState(null);
+  const [isLoading, setIsLoading] = React.useState(false);
+
   return (
     <>
       <StatusBar barStyle="dark-content" />
       <SafeAreaView>
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          style={styles.scrollView}>
-          <Header />
-          {global.HermesInternal == null ? null : (
-            <View style={styles.engine}>
-              <Text style={styles.footer}>Engine: Hermes</Text>
-            </View>
-          )}
-          <View style={styles.body}>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Step One</Text>
-              <Text style={styles.sectionDescription}>
-                Edit <Text style={styles.highlight}>App.js</Text> to change this
-                screen and then come back to see your edits.
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>See Your Changes</Text>
-              <Text style={styles.sectionDescription}>
-                <ReloadInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Debug</Text>
-              <Text style={styles.sectionDescription}>
-                <DebugInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Learn More</Text>
-              <Text style={styles.sectionDescription}>
-                Read the docs to discover what to do next:
-              </Text>
-            </View>
-            <LearnMoreLinks />
-          </View>
-        </ScrollView>
+        <Button
+          title="이미지 선택"
+          onPress={() => {
+            setIsLoading(true);
+            ImagePicker.showImagePicker(options, (response) => {
+              console.log('Response = ', response);
+
+              if (response.didCancel) {
+                setIsLoading(false);
+                console.warn('User cancelled image picker');
+              } else if (response.error) {
+                setIsLoading(false);
+                console.warn('ImagePicker Error: ', response.error);
+                alert('ImagePicker Error: ' + response.error);
+              } else if (response.customButton) {
+                setIsLoading(false);
+                console.warn(
+                  'User tapped custom button: ',
+                  response.customButton,
+                );
+              } else {
+                // const source = { uri: response.uri };
+
+                // You can also display the image using data:
+                // const source = { uri: 'data:image/jpeg;base64,' + response.data };
+                // setUrl( 'data:' + response.type + ';base64,' + response.data );
+                const params = new FormData();
+                params.append('image', response.data);
+                axios
+                  .post('https://api.imgur.com/3/image', params, config)
+                  .then((response) => {
+                    setUrl(response.data.data.link);
+                  })
+                  .catch((error) => {
+                    console.warn(error);
+                    alert('Error : ' + error.response.data.data.error);
+                  })
+                  .finally(() => {
+                    setIsLoading(false);
+                  });
+              }
+            });
+          }}
+        />
+
+        {isLoading ? (
+          <ActivityIndicator />
+        ) : (
+          <>
+            {url && (
+              <Image source={{uri: url}} style={{width: 340, height: 340}} />
+            )}
+          </>
+        )}
       </SafeAreaView>
     </>
   );
-};
-
-const styles = StyleSheet.create({
-  scrollView: {
-    backgroundColor: Colors.lighter,
-  },
-  engine: {
-    position: 'absolute',
-    right: 0,
-  },
-  body: {
-    backgroundColor: Colors.white,
-  },
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: Colors.black,
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-    color: Colors.dark,
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-  footer: {
-    color: Colors.dark,
-    fontSize: 12,
-    fontWeight: '600',
-    padding: 4,
-    paddingRight: 12,
-    textAlign: 'right',
-  },
-});
+}
 
 export default App;
