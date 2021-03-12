@@ -15,17 +15,7 @@ import {
   Button,
   StatusBar,
 } from 'react-native';
-import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
-import axios from 'axios';
-
-const options = {
-  title: '이미지를 선택해주세요',
-  customButtons: [{name: 'fb', title: '페이스북 사진첩에서 선택하기'}],
-  storageOptions: {
-    skipBackup: true,
-    path: 'images',
-  },
-};
+import {launchImageLibrary} from 'react-native-image-picker';
 
 function App() {
   const [fileName, setFileName] = React.useState(null);
